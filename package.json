@@ -1,0 +1,10 @@
+{
+  "name": "pos-system",
+  "version": "1.0.0",
+  "description": "HQ POS system for managing F&B outlets",
+  "private": true,
+  "scripts": {
+    "server": "cd server && npm start",
+    "client": "cd client && npm run dev"
+  }
+}
