@@ -2,6 +2,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import menuItemRoutes from "./routes/menuItemRoutes.js";
+import outletRoutes from "./routes/outletRoutes.js";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/menu-items", menuItemRoutes);
+app.use("/api/outlets", outletRoutes);
 
 // basic error handler
 app.use((err, req, res, next) => {
