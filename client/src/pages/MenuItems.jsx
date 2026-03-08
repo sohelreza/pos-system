@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../lib/api";
+import { formatPrice } from "../lib/config";
 
 export default function MenuItems() {
   const [items, setItems] = useState([]);
@@ -152,9 +153,7 @@ export default function MenuItems() {
               <tr key={item.id} className="border-b">
                 <td className="p-3">{item.name}</td>
                 <td className="p-3">{item.category || "-"}</td>
-                <td className="p-3">
-                  ${parseFloat(item.base_price).toFixed(2)}
-                </td>
+                <td className="p-3">{formatPrice(item.base_price)}</td>
                 <td className="p-3 flex gap-2">
                   <button
                     onClick={() => handleEdit(item)}
