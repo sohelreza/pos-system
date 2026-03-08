@@ -1,6 +1,7 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import { errorHandler } from "./middleware/errorHandler.js";
 import inventoryRoutes from "./routes/inventoryRoutes.js";
 import menuItemRoutes from "./routes/menuItemRoutes.js";
 import outletMenuRoutes from "./routes/outletMenuRoutes.js";
@@ -27,11 +28,7 @@ app.use("/api/outlets", inventoryRoutes);
 app.use("/api/outlets", salesRoutes);
 app.use("/api/reports", reportRoutes);
 
-// basic error handler
-app.use((err, req, res, next) => {
-  const status = err.status || 500;
-  res.status(status).json({ error: err.message || "Internal server error" });
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
