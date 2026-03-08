@@ -5,6 +5,7 @@ import inventoryRoutes from "./routes/inventoryRoutes.js";
 import menuItemRoutes from "./routes/menuItemRoutes.js";
 import outletMenuRoutes from "./routes/outletMenuRoutes.js";
 import outletRoutes from "./routes/outletRoutes.js";
+import salesRoutes from "./routes/salesRoutes.js";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use("/api/menu-items", menuItemRoutes);
 app.use("/api/outlets", outletRoutes);
 app.use("/api/outlets", outletMenuRoutes);
 app.use("/api/outlets", inventoryRoutes);
+app.use("/api/outlets", salesRoutes);
 
 // basic error handler
 app.use((err, req, res, next) => {
