@@ -1,9 +1,9 @@
 export const CURRENCY = {
-  symbol: "৳",
+  symbol: "Tk",
   code: "BDT",
   locale: "en-BD",
 };
 
 export const formatPrice = (amount) => {
-  return `${CURRENCY.symbol}${Number.parseFloat(amount).toFixed(2)}`;
+  return `${Number.parseFloat(amount).toFixed(2)} ${CURRENCY.symbol}`;
 };
