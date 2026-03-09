@@ -14,12 +14,14 @@ export const findByOutlet = async (outletId) => {
 };
 
 export const assign = async ({ outlet_id, menu_item_id, override_price }) => {
+  const price = override_price !== undefined ? override_price : null;
   const result = await pool.query(
-    `INSERT INTO outlet_menu (outlet_id, menu_item_id, override_price),m
+    `INSERT INTO outlet_menu (outlet_id, menu_item_id, override_price)
     VALUES ($1, $2, $3)
-    ON CONFLICT (outlet_id, menu_item_id) DO UPDATE SET override_price = $3, is_active = true
+    ON CONFLICT (outlet_id, menu_item_id)
+    DO UPDATE SET override_price = EXCLUDED.override_price, is_active = true
     RETURNING *`,
-    [outlet_id, menu_item_id, override_price || null],
+    [outlet_id, menu_item_id, price],
   );
   return result.rows[0];
 };
