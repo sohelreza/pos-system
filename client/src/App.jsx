@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
+import Inventory from "./pages/Inventory";
 import MenuItems from "./pages/MenuItems";
 import OutletMenu from "./pages/OutletMenu";
 import Outlets from "./pages/Outlets";
@@ -15,6 +16,7 @@ function App() {
           <Route path="menu-items" element={<MenuItems />} />
           <Route path="outlets" element={<Outlets />} />
           <Route path="outlet-menu" element={<OutletMenu />} />
+          <Route path="inventory" element={<Inventory />} />
           <Route path="sales" element={<Sales />} />
         </Route>
       </Routes>
