@@ -2,6 +2,10 @@
 
 HQ management system for F&B outlets. Manages master menu, assigns menu items to outlets, tracks inventory, processes sales transactions, and generates reports.
 
+## Deployed Instance
+
+https://pos-client-tos5.onrender.com/
+
 ## Tech Stack
 
 - **Backend:** Node.js, Express.js, PostgreSQL
