@@ -19,7 +19,6 @@ export default function Reports() {
         setRevenue(revRes.data);
         setOutlets(outRes.data);
       } catch (err) {
-        console.log("Failed to fetch reports");
       } finally {
         setLoading(false);
       }
@@ -36,9 +35,7 @@ export default function Reports() {
       try {
         const res = await api.get(`/reports/top-items/${selectedOutlet}`);
         setTopItems(res.data);
-      } catch (err) {
-        console.log("Failed to fetch top items");
-      }
+      } catch (err) {}
     };
     fetchTopItems();
   }, [selectedOutlet]);

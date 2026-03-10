@@ -18,7 +18,7 @@ export default function MenuItems() {
       const res = await api.get("/menu-items");
       setItems(res.data);
     } catch (err) {
-      console.log("Failed to fetch menu items", err);
+      // TODO: show error toast
     } finally {
       setLoading(false);
     }

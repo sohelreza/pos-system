@@ -12,7 +12,7 @@ export default function Outlets() {
       const res = await api.get("/outlets");
       setOutlets(res.data);
     } catch (err) {
-      console.log("Failed to fetch outlets", err);
+      // TODO: show error toast
     } finally {
       setLoading(false);
     }
