@@ -48,6 +48,19 @@ export const createSale = async (outletId, items) => {
       const subtotal = unitPrice * item.quantity;
       totalAmount += subtotal;
 
+      // check inventory exists
+      const stockCheck = await client.query(
+        "SELECT stock FROM inventory WHERE outlet_id = $1 AND menu_item_id = $2",
+        [outletId, item.menu_item_id],
+      );
+
+      if (stockCheck.rows.length === 0) {
+        throw {
+          status: 400,
+          message: `No inventory record for menu item ${item.menu_item_id}. Set stock first.`,
+        };
+      }
+
       // deduct inventory
       const inventoryResult = await client.query(
         `UPDATE inventory SET stock = stock - $1
