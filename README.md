@@ -33,13 +33,6 @@ routes -> controllers -> services -> repositories -> database
 - **sale_items** - Individual items within a sale
 - **receipt_counters** - Tracks last receipt number per outlet for concurrency-safe sequential generation
 
-### Key Constraints
-
-- `UNIQUE(outlet_id, menu_item_id)` on outlet_menu and inventory
-- `CHECK (stock >= 0)` on inventory
-- `UNIQUE(outlet_id, receipt_number)` on sales
-- Foreign keys with `ON DELETE CASCADE`
-
 ### Concurrency
 
 Receipt numbers are generated using `SELECT ... FOR UPDATE` on the receipt_counters table within a database transaction. This ensures sequential, gapless receipt numbers even under concurrent requests.
@@ -65,7 +58,7 @@ cd pos-system
 ```bash
 cd server
 cp .env.example .env
-# update .env with your database credentials
+# update .env with the database credentials
 npm install
 npm run migrate
 npm run dev
