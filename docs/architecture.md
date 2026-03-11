@@ -73,8 +73,6 @@ Single server, single database. Suitable for a few outlets with low transaction 
 
 #### Database Scaling
 
-**Connection Pooling:** Replace direct connections with PgBouncer or similar connection pooler. Current pg Pool handles this at app level, but a dedicated pooler would manage connections more efficiently under load.
-
 **Read Replicas:** Set up one or more read replicas for reporting queries. The reporting endpoints (revenue, top items) are read-heavy and can be offloaded to replicas without affecting write performance on the primary.
 
 **Table Partitioning:** Partition the sales and sale_items tables by outlet_id or by month. At 100k transactions/month, the sales table grows quickly. Partitioning by month allows efficient queries for recent data and easy archival of old partitions.
@@ -107,13 +105,12 @@ GROUP BY outlet_id;
 - Move reporting to read replicas
 - Use materialized views for dashboard summaries
 - Add date range filters to avoid full table scans
-- Consider a separate analytics database (data warehouse) if reporting complexity grows
 
 #### Infrastructure
 
 - **Horizontal scaling:** Run multiple backend instances behind a load balancer. The application is stateless so any instance can handle any request.
 - **Caching:** Add Redis for caching menu data, outlet info, and report summaries. Menu items and outlet assignments change infrequently, making them ideal cache candidates.
-- **Queue system:** For non-critical tasks (e.g. sending receipt emails, updating analytics), use a message queue like Bull/BullMQ with Redis to process asynchronously.
+- **Queue system:** For non-critical tasks (e.g. sending receipt emails, updating analytics), use a message queue like RabbitMQ/BullMQ with Redis to process asynchronously.
 
 #### Architectural Evolution
 
@@ -140,7 +137,7 @@ The current monolith can be split into these services:
 
 - Owns: inventory table
 - Responsibilities: Stock management, stock queries
-- Why separate: Inventory updates happen at sale time and during restocking. Needs to be highly available and consistent. Could use event-driven updates from the sales service.
+- Why separate: Inventory updates happen at sale time and during restocking. Needs to be highly available and consistent.
 
 **3. Sales Service**
 
@@ -159,18 +156,6 @@ The current monolith can be split into these services:
 - Owns: outlets table
 - Responsibilities: Outlet CRUD, outlet configuration
 - Why separate: Simple CRUD with low traffic. Could remain part of another service initially.
-
-### Communication
-
-- **Synchronous (REST/gRPC):** Sales service calls Inventory service to check/deduct stock. Menu service is called to get prices.
-- **Asynchronous (Event bus):** After a sale completes, publish an event. Reporting service consumes it to update aggregates. Inventory service could also consume sale events for stock updates.
-
-### Data Consistency
-
-The biggest challenge is the sales transaction which currently runs in a single database transaction (get price, deduct stock, generate receipt, insert sale). In microservices:
-
-- **Option 1: Saga pattern** - Each service handles its part and publishes events. Compensating transactions handle failures (e.g. if stock deduction fails, cancel the sale).
-- **Option 2: Keep sales + inventory in one service initially** - Since they're tightly coupled during a sale, splitting them too early adds complexity without benefit.
 
 ### Migration Strategy
 
@@ -207,9 +192,6 @@ Each POS terminal maintains a local copy of:
 - Current inventory levels
 - Pending sales queue
 
-**Receipt Number Generation:**
-Pre-allocate receipt number ranges from HQ. When the POS goes online, HQ assigns a range (e.g. OUT1-0500 to OUT1-0999). The POS uses these locally. When running low (e.g. 80% used), request a new range. If offline and range exhausted, use a temporary prefix (e.g. OUT1-TEMP-001) and reconcile later.
-
 **Sales Processing:**
 
 1. POS creates the sale locally against local inventory
@@ -221,13 +203,12 @@ Pre-allocate receipt number ranges from HQ. When the POS goes online, HQ assigns
 
 Since POS and KDS are on the same local network:
 
-- Use WebSocket or local HTTP server for real-time communication
 - POS sends order to KDS directly over LAN
 - KDS displays order and manages kitchen workflow
 - No dependency on internet for POS-KDS communication
 
 ```
-POS Terminal ---(WebSocket over LAN)---> KDS Display
+POS Terminal ---(LAN)---> KDS Display
 ```
 
 ### Sync Strategy (When Back Online)
@@ -245,17 +226,9 @@ POS Terminal ---(WebSocket over LAN)---> KDS Display
 1. HQ sends updated menu items, prices, and inventory adjustments
 2. POS replaces local cache with fresh data
 
-### Conflict Resolution
-
-- **Receipt numbers:** Pre-allocated ranges prevent conflicts. Temporary receipts are reassigned permanent numbers during sync.
-- **Inventory:** HQ maintains the source of truth. After sync, HQ recalculates actual inventory based on all synced sales. If stock went negative (sold more than available due to stale local data), flag for review.
-- **Price changes:** Sales use the price at time of sale (stored in sale_items.unit_price). Price changes from HQ take effect on next sync.
-
 ### Implementation Considerations
 
-- Use a Service Worker for the web-based POS to enable offline capability
 - IndexedDB for local storage in browser-based POS
 - SQLite for native POS applications
-- Implement retry logic with exponential backoff for sync
 - Add a sync status indicator on the POS UI (online/offline/syncing)
 - Log all sync operations for audit trail
